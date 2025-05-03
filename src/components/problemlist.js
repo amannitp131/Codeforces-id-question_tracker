@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 export default function ProblemList({ problems }) {
   const [selectedRating, setSelectedRating] = useState('');
-  const [selectedParticipantType, setSelectedParticipantType] = useState('');
+  const [selectedparticipantType, setSelectedparticipantType] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
 
   // Extract ratings, participantTypes, and tags from problems
@@ -14,50 +14,72 @@ export default function ProblemList({ problems }) {
   // Filtering logic
   const filtered = problems.filter((p) => {
     const ratingMatch = !selectedRating || p.rating === parseInt(selectedRating);
-    const participantTypeMatch = !selectedParticipantType || p.participantType === selectedParticipantType;
+    const participantTypeMatch = !selectedparticipantType || p.participantType === selectedparticipantType;
     const tagMatch = !selectedTag || (p.tags && p.tags.includes(selectedTag));
     return ratingMatch && participantTypeMatch && tagMatch;
   });
 
   return (
-    <div>
-      <label><strong>Filter by rating: </strong></label>
-      <select value={selectedRating} onChange={(e) => setSelectedRating(e.target.value)}>
-        <option value="">All</option>
-        {ratings.map((r) => (
-          <option key={r} value={r}>{r}</option>
-        ))}
-      </select>
-
-      <label style={{ marginLeft: '1rem' }}><strong>Filter by participant type: </strong></label>
-      <select value={selectedParticipantType} onChange={(e) => setSelectedParticipantType(e.target.value)}>
-        <option value="">All</option>
-        {participantTypes.map((pt) => (
-          <option key={pt} value={pt}>{pt}</option>
-        ))}
-      </select>
-
-      <label style={{ marginLeft: '1rem' }}><strong>Filter by tag: </strong></label>
-      <select value={selectedTag} onChange={(e) => setSelectedTag(e.target.value)}>
-        <option value="">All</option>
-        {tags.map((tag) => (
-          <option key={tag} value={tag}>{tag}</option>
-        ))}
-      </select>
-
-      <ul style={{ marginTop: '1rem' }}>
-        {filtered.map((p) => (
-          <li key={`${p.contestId}-${p.index}`}>
-            <a
-              href={`https://codeforces.com/problemset/problem/${p.contestId}/${p.index}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {p.name} ({p.rating || 'Unrated'})
-            </a>
-          </li>
-        ))}
-      </ul>
+    <div className="p-6 bg-black rounded-lg shadow-md">
+    <div className="flex flex-wrap items-center gap-4 mb-6">
+      <div>
+        <label className="font-semibold mr-2 text-white">Filter by rating:</label>
+        <select
+          className="border rounded px-2 py-1 bg-black text-white border-gray-600"
+          value={selectedRating}
+          onChange={(e) => setSelectedRating(e.target.value)}
+        >
+          <option value="">All</option>
+          {ratings.map((r) => (
+            <option key={r} value={r}>{r}</option>
+          ))}
+        </select>
+      </div>
+  
+      <div>
+        <label className="font-semibold mr-2 text-white">Filter by participant type:</label>
+        <select
+          className="border rounded px-2 py-1 bg-black text-white border-gray-600"
+          value={selectedparticipantType}
+          onChange={(e) => setSelectedparticipantType(e.target.value)}
+        >
+          <option value="">All</option>
+          {participantTypes.map((pt) => (
+            <option key={pt} value={pt}>{pt}</option>
+          ))}
+        </select>
+      </div>
+  
+      <div>
+        <label className="font-semibold mr-2 text-white">Filter by tag:</label>
+        <select
+          className="border rounded px-2 py-1 bg-black text-white border-gray-600"
+          value={selectedTag}
+          onChange={(e) => setSelectedTag(e.target.value)}
+        >
+          <option value="">All</option>
+          {tags.map((tag) => (
+            <option key={tag} value={tag}>{tag}</option>
+          ))}
+        </select>
+      </div>
     </div>
+  
+    <ul className="space-y-2">
+      {filtered.map((p) => (
+        <li key={`${p.contestId}-${p.index}`}>
+          <a
+            href={`https://codeforces.com/problemset/problem/${p.contestId}/${p.index}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:underline"
+          >
+            {p.name} <span className="text-gray-300">({p.rating || 'Unrated'})</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    
+  </div>
   );
 }

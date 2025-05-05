@@ -8,15 +8,13 @@ export default function ProblemList({ problems }) {
 
   // Extract ratings, participantTypes, and tags from problems
   const ratings = Array.from(new Set(problems.map((p) => p.rating).filter(Boolean))).sort((a, b) => a - b);
-  const participantTypes = Array.from(new Set(problems.map((p) => p.participantType).filter(Boolean)));
   const tags = Array.from(new Set(problems.flatMap((p) => p.tags || []).filter(Boolean))).sort();
 
   // Filtering logic
   const filtered = problems.filter((p) => {
     const ratingMatch = !selectedRating || p.rating === parseInt(selectedRating);
-    const participantTypeMatch = !selectedparticipantType || p.participantType === selectedparticipantType;
     const tagMatch = !selectedTag || (p.tags && p.tags.includes(selectedTag));
-    return ratingMatch && participantTypeMatch && tagMatch;
+    return ratingMatch  && tagMatch;
   });
 
   return (
@@ -36,19 +34,7 @@ export default function ProblemList({ problems }) {
         </select>
       </div>
   
-      <div>
-        <label className="font-semibold mr-2 text-white">Filter by participant type:</label>
-        <select
-          className="border rounded px-2 py-1 bg-black text-white border-gray-600"
-          value={selectedparticipantType}
-          onChange={(e) => setSelectedparticipantType(e.target.value)}
-        >
-          <option value="">All</option>
-          {participantTypes.map((pt) => (
-            <option key={pt} value={pt}>{pt}</option>
-          ))}
-        </select>
-      </div>
+
   
       <div>
         <label className="font-semibold mr-2 text-white">Filter by tag:</label>

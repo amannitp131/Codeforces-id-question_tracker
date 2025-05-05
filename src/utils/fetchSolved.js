@@ -1,7 +1,7 @@
 export async function fetchSolvedProblems(handle) {
     const res = await fetch(`https://codeforces.com/api/user.status?handle=${handle}`);
     const data = await res.json();
-    if (data.status !== "OK") throw new Error("User not found or API error");
+    if (data.status !== "OK") throw new Error("User not found");
   
     const solvedSet = new Set();
     const problems = [];

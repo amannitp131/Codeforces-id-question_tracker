@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { fetchSolvedProblems } from '../utils/fetchSolved';
 import ProblemList from '../components/problemlist';
-import TopSolutions from '../components/TopSolutions';
 
 export default function Home() {
   const [handle, setHandle] = useState('');

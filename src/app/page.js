@@ -31,7 +31,7 @@ function TopSolution() {
       try {
           const user = localStorage.getItem('codtrack');
           if (user) {
-              const res = await fetch(`http://localhost:10000/api/usertrack?user=${encodeURIComponent(user)}`);
+              const res = await fetch(`https://codeforces-id-question-tracker.onrender.com/api/usertrack?user=${encodeURIComponent(user)}`);
               if (res.ok) {
                   const data = await res.json();
                   console.log("Data from backend for usertrack:", data);
@@ -102,7 +102,7 @@ function TopSolution() {
             return;
         }
         try {
-            const res = await fetch('http://localhost:10000/api/usertrack', {
+            const res = await fetch('https://codeforces-id-question-tracker.onrender.com/api/usertrack', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user, tophandle: newTopHandle.trim() })

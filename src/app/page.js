@@ -18,7 +18,7 @@ function TopSolution() {
 
     // Default handles
     const defaultHandles = [
-        "tourist"
+        "tourist","jiangly","Dominater069"
     ];
 
     async function getSolutionLink(e) {

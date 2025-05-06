@@ -120,14 +120,18 @@ function TopSolution() {
 
     return (
         <div className="relative max-w-md mx-auto mt-10 p-6 rounded-lg shadow-lg bg-gray-900 font-sans text-gray-100 border border-gray-800 transition-colors duration-300">
-            {/* + Button */}
-            <button
-                className="absolute top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center text-xl font-bold"
-                title="Add Top Handle"
-                onClick={() => setShowModal(true)}
-                type="button"
-            >+</button>
-
+            {/* + Button and Heading in flex container for spacing */}
+            <div className="flex justify-end mb-4">
+                <button
+                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center text-xl font-bold"
+                    title="Add Top Handle"
+                    onClick={() => setShowModal(true)}
+                    type="button"
+                >+</button>
+            </div>
+            <h2 className="text-center text-blue-300 text-2xl font-semibold mb-6">
+                Find Codeforces Solution Link
+            </h2>
             {/* Modal */}
             {showModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
@@ -156,9 +160,6 @@ function TopSolution() {
                 </div>
             )}
 
-            <h2 className="text-center text-blue-300 text-2xl font-semibold mb-6">
-                Find Codeforces Solution Link
-            </h2>
             <form
                 onSubmit={getSolutionLink}
                 className="flex flex-col gap-4"

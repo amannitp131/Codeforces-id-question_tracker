@@ -7,63 +7,155 @@ import ProblemList from '../components/problemlist';
 function TopSolution() {
     const [contestId, setContestId] = useState("");
     const [index, setIndex] = useState("");
-    const [results, setResults] = useState([]); // [{handle, link}]
+    const [results, setResults] = useState([]); 
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const handles = [
-        "orzdevinwang","jiangly","tourist","Dominater069","jtnydv25","MridulAhi","IceKnight1093","arnabmanna","cerberus97","invertedwinger",
-        "nishkarsh","socho"
+    // Modal state for adding top handle
+    const [showModal, setShowModal] = useState(false);
+    const [newTopHandle, setNewTopHandle] = useState('');
+    const [modalError, setModalError] = useState('');
+
+    // Default handles
+    const defaultHandles = [
+        "tourist"
     ];
 
     async function getSolutionLink(e) {
-        e.preventDefault();
-        setResults([]);
-        setError("");
-        setLoading(true);
+      e.preventDefault();
+      setResults([]);
+      setError("");
+      setLoading(true);
+  
+      let extraHandles = [];
+      try {
+          const user = localStorage.getItem('codtrack');
+          if (user) {
+              const res = await fetch(`http://localhost:10000/api/usertrack?user=${encodeURIComponent(user)}`);
+              if (res.ok) {
+                  const data = await res.json();
+                  console.log("Data from backend for usertrack:", data);
+                  if (Array.isArray(data.tophandle)) {
+                      extraHandles = data.tophandle.filter(Boolean);
+                  }
+              }
+          }
+      } catch (error) {
+          console.log(error);
+      }
+  
+      const handles = [...defaultHandles, ...extraHandles];
+      let foundAny = false;
+  
+      const promises = handles.map(async (handle) => {
+          try {
+              const apiUrl = `https://codeforces.com/api/user.status?handle=${handle}&count=10000`;
+              const resp = await fetch(apiUrl);
+              const data = await resp.json();
+              if (data.status !== "OK") return;
+  
+              const submissions = data.result;
+              const match = submissions.find(
+                  (sub) =>
+                      sub.problem.contestId == contestId &&
+                      sub.problem.index.toUpperCase() === index.toUpperCase() &&
+                      sub.verdict === "OK"
+              );
+  
+              if (match) {
+                  foundAny = true;
+                  setResults(prev => [
+                      ...prev,
+                      {
+                          handle,
+                          link: `https://codeforces.com/contest/${contestId}/submission/${match.id}`,
+                          time: match.timeConsumedMillis,
+                          memory: match.memoryConsumedBytes,
+                          lang: match.programmingLanguage
+                      }
+                  ]);
+              }
+          } catch (err) {
+              console.log(err);
+          }
+      });
+  
+      await Promise.all(promises);
+  
+      setLoading(false);
+      if (!foundAny) {
+          setError("No accepted solution found for the given Question among the provided users.");
+      }
+  }
+  
 
-        let foundAny = false;
-        handles.forEach(async (handle) => {
-            try {
-                const apiUrl = `https://codeforces.com/api/user.status?handle=${handle}&count=10000`;
-                const resp = await fetch(apiUrl);
-                const data = await resp.json();
-                if (data.status !== "OK") return;
-                const submissions = data.result;
-                const match = submissions.find(
-                    (sub) =>
-                        sub.problem.contestId == contestId &&
-                        sub.problem.index.toUpperCase() === index.toUpperCase() &&
-                        sub.verdict === "OK"
-                );
-                if (match) {
-                    foundAny = true;
-                    setResults(prev => [
-                        ...prev,
-                        {
-                            handle,
-                            link: `https://codeforces.com/contest/${contestId}/submission/${match.id}`,
-                            time: match.timeConsumedMillis,
-                            memory: match.memoryConsumedBytes,
-                            lang: match.programmingLanguage
-                        }
-                    ]);
-                }
-            } catch {
-                // ignore errors for individual users
+    // Save new top handle via API
+    async function saveTopHandle() {
+        setModalError('');
+        const user = localStorage.getItem('codtrack');
+        if (!user) {
+            setModalError('User not found in localStorage');
+            return;
+        }
+        if (!newTopHandle.trim()) {
+            setModalError('Handle cannot be empty');
+            return;
+        }
+        try {
+            const res = await fetch('http://localhost:10000/api/usertrack', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user, tophandle: newTopHandle.trim() })
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Failed to save');
             }
-        });
-
-        setTimeout(() => {
-            setLoading(false);
-            if (!foundAny) {
-                // setError("No accepted solution found for the given Question among the provided users.");
-            }
-        }, handles.length * 500);
+            setShowModal(false);
+            setNewTopHandle('');
+        } catch (err) {
+            setModalError(err.message);
+        }
     }
 
     return (
-        <div className="max-w-md mx-auto mt-10 p-6 rounded-lg shadow-lg bg-gray-900 font-sans text-gray-100 border border-gray-800 transition-colors duration-300">
+        <div className="relative max-w-md mx-auto mt-10 p-6 rounded-lg shadow-lg bg-gray-900 font-sans text-gray-100 border border-gray-800 transition-colors duration-300">
+            {/* + Button */}
+            <button
+                className="absolute top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center text-xl font-bold"
+                title="Add Top Handle"
+                onClick={() => setShowModal(true)}
+                type="button"
+            >+</button>
+
+            {/* Modal */}
+            {showModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+                    <div className="bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-700 max-w-xs w-full flex flex-col gap-4">
+                        <label className="flex flex-col gap-2">
+                            <span className="text-gray-200 font-semibold">Add Top Handle</span>
+                            <input
+                                value={newTopHandle}
+                                onChange={e => setNewTopHandle(e.target.value)}
+                                className="px-3 py-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none"
+                                placeholder="Enter handle"
+                            />
+                        </label>
+                        {modalError && <div className="text-red-400 text-sm">{modalError}</div>}
+                        <div className="flex gap-2">
+                            <button
+                                onClick={saveTopHandle}
+                                className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold transition"
+                            >Save</button>
+                            <button
+                                onClick={() => { setShowModal(false); setModalError(''); }}
+                                className="w-full py-2 bg-gray-700 hover:bg-gray-800 text-white rounded font-bold transition"
+                            >Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <h2 className="text-center text-blue-300 text-2xl font-semibold mb-6">
                 Find Codeforces Solution Link
             </h2>

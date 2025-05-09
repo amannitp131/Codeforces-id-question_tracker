@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react';
 import { fetchSolvedProblems } from '../utils/fetchSolved';
 
 export default function ProblemList({ problems }) {
-  const [selectedRating, setSelectedRating] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
   const [solvedSet, setSolvedSet] = useState(new Set());
+  const [selectedLower, setSelectedLower] = useState('');
+  const [selectedUpper, setSelectedUpper] = useState('');
 
   // Fetch solved problems for the user in localStorage
   useEffect(() => {
@@ -26,7 +27,9 @@ export default function ProblemList({ problems }) {
 
   // Filtering logic
   const filtered = problems.filter((p) => {
-    const ratingMatch = !selectedRating || p.rating === parseInt(selectedRating);
+    let ratingMatch = true;
+    if (selectedLower) ratingMatch = p.rating >= parseInt(selectedLower);
+    if (selectedUpper) ratingMatch = ratingMatch && p.rating <= parseInt(selectedUpper);
     const tagMatch = !selectedTag || (p.tags && p.tags.includes(selectedTag));
     return ratingMatch && tagMatch;
   });
@@ -35,13 +38,30 @@ export default function ProblemList({ problems }) {
     <div className="p-6 bg-black rounded-lg shadow-md">
       <div className="flex flex-wrap items-center gap-4 mb-6">
         <div>
-          <label className="font-semibold mr-2 text-white">Filter by rating:</label>
+          <label className="font-semibold mr-2 text-white">Lower limit:</label>
           <select
             className="border rounded px-2 py-1 bg-black text-white border-gray-600"
-            value={selectedRating}
-            onChange={(e) => setSelectedRating(e.target.value)}
+            value={selectedLower}
+            onChange={(e) => {
+              setSelectedLower(e.target.value);
+            }}
           >
-            <option value="">All</option>
+            <option value="">None</option>
+            {ratings.map((r) => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="font-semibold mr-2 text-white">Upper limit:</label>
+          <select
+            className="border rounded px-2 py-1 bg-black text-white border-gray-600"
+            value={selectedUpper}
+            onChange={(e) => {
+              setSelectedUpper(e.target.value);
+            }}
+          >
+            <option value="">None</option>
             {ratings.map((r) => (
               <option key={r} value={r}>{r}</option>
             ))}
